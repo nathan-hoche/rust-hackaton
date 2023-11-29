@@ -1,11 +1,11 @@
-# Rust Hackaton with ink! and Substrate ( 8 am - 6 pm )
+# Rust Hackaton with ink! and Substrate ( 9 am - 6 pm )
 
-## 8:30 - 9:00 am: Welcome and Introductions
+## 9:00 - 9:30 am: Welcome and Introductions
 
 - Brief introduction of the instructor and Allfeat labs.
 - Briefly talk about the agenda and learning objectives for the day.
 
-## 9:00 - 12:00 am: Introduction to Rust
+## 9:30 - 12:00 am: Introduction to Rust
 
 1 - For beginers that were not here last year at the rust bundle
 
