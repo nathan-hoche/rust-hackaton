@@ -1,22 +1,82 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
 #[ink::contract]
-mod ink_show {
-
+mod client {
     /// Defines the storage of your contract.
     /// Add new fields to the below struct in order
     /// to add new static storage fields to your contract.
-    #[ink(storage)]
-    pub struct InkShow {
-        /// Stores a single `bool` value on the storage.
-        value: bool,
+    
+    #[derive(scale::Decode, scale::Encode, Debug)]
+    #[cfg_attr(
+        feature = "std",
+        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
+    )]
+    pub enum Role {
+        SuperAdmin,
+        Admin,
+        Modo,
+        User
     }
 
-    impl InkShow {
+    impl Default for Role {
+        fn default() -> Self {
+            Role::User
+        }
+    }
+
+    impl Clone for Role {
+        fn clone(&self) -> Self {
+            match self {
+                Role::SuperAdmin => Role::SuperAdmin,
+                Role::Admin => Role::Admin,
+                Role::Modo => Role::Modo,
+                Role::User => Role::User,
+            }
+        }   
+    }
+
+    impl PartialEq for Role {
+        fn eq(&self, other: &Self) -> bool {
+            match self {
+                Role::SuperAdmin => {
+                    match other {
+                        Role::SuperAdmin => true,
+                        _ => false
+                    }
+                },
+                Role::Admin => {
+                    match other {
+                        Role::Admin => true,
+                        _ => false
+                    }
+                },
+                Role::Modo => {
+                    match other {
+                        Role::Modo => true,
+                        _ => false
+                    }
+                },
+                Role::User => {
+                    match other {
+                        Role::User => true,
+                        _ => false
+                    }
+                },
+            }
+        }
+    }
+
+    #[ink(storage)]
+    pub struct Client {
+        /// Stores a single `bool` value on the storage.
+        role: Role,
+    }
+
+    impl Client {
         /// Constructor that initializes the `bool` value to the given `init_value`.
         #[ink(constructor)]
-        pub fn new(init_value: bool) -> Self {
-            Self { value: init_value }
+        pub fn new(init_value: Role) -> Self {
+            Self {role: init_value }
         }
 
         /// Constructor that initializes the `bool` value to `false`.
@@ -27,18 +87,22 @@ mod ink_show {
             Self::new(Default::default())
         }
 
-        /// A message that can be called on instantiated contracts.
-        /// This one flips the value of the stored `bool` from `true`
-        /// to `false` and vice versa.
         #[ink(message)]
-        pub fn flip(&mut self) {
-            self.value = !self.value;
+        pub fn set(&mut self, role: Role) {
+            if self.role == Role::SuperAdmin {
+                self.role = role.clone();
+            } else if self.role == Role::Admin {
+                if role == Role::Modo || role == Role::User {
+                    self.role = role.clone();
+                }
+            }
         }
+
 
         /// Simply returns the current value of our `bool`.
         #[ink(message)]
-        pub fn get(&self) -> bool {
-            self.value
+        pub fn get_role(&self) -> Role {
+            self.role.clone()
         }
     }
 
@@ -53,18 +117,30 @@ mod ink_show {
         /// We test if the default constructor does its job.
         #[ink::test]
         fn default_works() {
-            let ink_show = InkShow::default();
-            assert_eq!(ink_show.get(), false);
+            let cli = Client::default();
+            assert_eq!(cli.get_role(), Role::User);
         }
 
-        /// We test a simple use case of our contract.
+        /// We test to set role from SuperAdmin
+        /// SuperAdmin can set role to Admin, Modo, User
+        /// Admin can set role to Modo, User
+        
         #[ink::test]
-        fn it_works() {
-            let mut ink_show = InkShow::new(false);
-            assert_eq!(ink_show.get(), false);
-            ink_show.flip();
-            assert_eq!(ink_show.get(), true);
+        fn set_role_from_superadmin() {
+            let mut cli1: Client = Client::new(Role::SuperAdmin);
+            // let mut cli2 = Client::new(Default::default());
+            cli1.set(Role::Admin);
+            assert_eq!(cli1.get_role(), Role::Admin);
         }
+
+        #[ink::test]
+        fn set_role_from_admin() {
+            let mut cli1: Client = Client::new(Role::Admin);
+            // let mut cli2 = Client::new(Default::default());
+            cli1.set(Role::Modo);
+            assert_eq!(cli1.get_role(), Role::Modo);
+        }
+
     }
 
     /// This is how you'd write end-to-end (E2E) or integration tests for ink! contracts.
