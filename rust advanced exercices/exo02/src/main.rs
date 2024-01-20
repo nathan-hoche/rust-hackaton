@@ -1,12 +1,13 @@
 enum Event {
-    Input(InputEvent),
+    Input(),
     Quit,
     Pause,
+    Resume,
 }
 
 enum InputEvent {
-    Click((i32, i32)),
-    KeyPress(char),
+    Click(),
+    KeyPress(),
 }
 
 fn main() {
@@ -20,5 +21,8 @@ fn main() {
     event.log_event();
 
     let event = Event::Pause;
+    event.log_event();
+
+    let event = Event::Resume;
     event.log_event();
 }

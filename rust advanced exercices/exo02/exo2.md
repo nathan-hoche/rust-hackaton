@@ -7,6 +7,7 @@ New event logged: Quit
 New event logged: Click at (45, 540)
 New event logged: Key pressed: a
 New event logged: Pause
+New event logged: Resume
 ```
 
 [Documentation](https://doc.rust-lang.org/book/ch18-03-pattern-syntax.html)
